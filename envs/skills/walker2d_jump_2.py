@@ -5,6 +5,7 @@ from gym.envs.mujoco import mujoco_env
 
 from gym.envs.skills.walker2d import Walker2dEnv
 
+import wandb
 
 class Walker2dJump2Env(Walker2dEnv):
     def __init__(self):
@@ -61,7 +62,9 @@ class Walker2dJump2Env(Walker2dEnv):
         x_vel = self._config["x_vel_limit"] - abs(x_vel - self._config["x_vel_limit"])
         right_foot_vel = abs(right_foot_after - right_foot_before) / self.dt
         left_foot_vel = abs(left_foot_after - left_foot_before) / self.dt
-        foot_diff = abs(self.data.body_xpos[4, 2] - self.data.body_xpos[7, 2])
+        foot_diff = abs(self.data.body_xpos[4, 0] - self.data.body_xpos[7, 0]) + \
+            abs(self.data.body_xpos[4, 1] - self.data.body_xpos[7, 1]) + \
+            abs(self.data.body_xpos[4, 2] - self.data.body_xpos[7, 2])
 
         # reward
         x_vel_reward = self._config["x_vel_reward"] * x_vel
@@ -92,6 +95,7 @@ class Walker2dJump2Env(Walker2dEnv):
                 "x_vel_mean": (x_after - x_before) / self.dt,
                 "height_mean": height,
                 "success": success}
+        wandb.log(info)
         return ob, reward, done, info
 
     def _get_obs(self):

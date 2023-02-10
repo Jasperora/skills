@@ -4,6 +4,7 @@ from gym.envs.mujoco import mujoco_env
 
 from gym.envs.skills.walker2d import Walker2dEnv
 
+import wandb
 
 class Walker2dBalanceEnv(Walker2dEnv):
     def __init__(self):
@@ -89,6 +90,7 @@ class Walker2dBalanceEnv(Walker2dEnv):
                 "nz_mean": nz,
                 "height_mean": height,
                 "success": success}
+        wandb.log(info)
         return ob, reward, done, info
 
     def _get_obs(self):

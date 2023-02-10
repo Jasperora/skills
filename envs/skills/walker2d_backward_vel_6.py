@@ -5,6 +5,7 @@ from gym.envs.mujoco import mujoco_env
 
 from gym.envs.skills.walker2d import Walker2dEnv
 
+import wandb
 
 class Walker2dBackwardEnv_vel_6(Walker2dEnv):
     def __init__(self):
@@ -89,6 +90,7 @@ class Walker2dBackwardEnv_vel_6(Walker2dEnv):
                 "x_vel_mean": -(x_after - x_before) / self.dt,
                 "height_mean": height,
                 "success": success}
+        wandb.log(info)
         return ob, reward, done, info
 
     def _get_obs(self):

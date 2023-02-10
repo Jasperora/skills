@@ -5,6 +5,7 @@ from gym.envs.mujoco import mujoco_env
 
 from gym.envs.skills.walker2d import Walker2dEnv
 
+import wandb
 
 class Walker2dForwardEnv_vel_6(Walker2dEnv):
     def __init__(self):
@@ -17,6 +18,7 @@ class Walker2dForwardEnv_vel_6(Walker2dEnv):
             "angle_reward": 0.1,
             "foot_reward": 0.01,
             "height_reward": 1,
+            "walk_reward": 2,
             "x_vel_limit": 6,
         })
 
@@ -25,7 +27,7 @@ class Walker2dForwardEnv_vel_6(Walker2dEnv):
 
         # env info
         self.reward_type += ["x_vel_reward", "alive_reward", "angle_reward",
-                             "foot_reward", "height_reward", "success",
+                             "foot_reward", "height_reward", "walk_reward", "success",
                              "x_vel_mean", "height_mean", "nz_mean", "delta_h_mean"]
         self.ob_type = self.ob_shape.keys()
 
@@ -61,6 +63,11 @@ class Walker2dForwardEnv_vel_6(Walker2dEnv):
         right_foot_vel = abs(right_foot_after - right_foot_before) / self.dt
         left_foot_vel = abs(left_foot_after - left_foot_before) / self.dt
 
+        if (right_foot_before < left_foot_before and right_foot_after > left_foot_after) or (left_foot_before < right_foot_before and left_foot_after > right_foot_after):
+            walk_reward = self._config["walk_reward"]
+        else:
+            walk_reward = 0
+
         # reward
         x_vel_reward = self._config["x_vel_reward"] * x_vel
         angle_reward = self._config["angle_reward"] * nz
@@ -68,7 +75,7 @@ class Walker2dForwardEnv_vel_6(Walker2dEnv):
         alive_reward = self._config["alive_reward"]
         foot_reward = -self._config["foot_reward"] * (right_foot_vel + left_foot_vel)
         reward = x_vel_reward + angle_reward + height_reward + \
-            ctrl_reward + alive_reward + foot_reward
+            ctrl_reward + alive_reward + foot_reward + walk_reward
 
         # fail
         done = height < self._config["min_height"]
@@ -83,11 +90,13 @@ class Walker2dForwardEnv_vel_6(Walker2dEnv):
                 "height_reward": height_reward,
                 "alive_reward": alive_reward,
                 "foot_reward": foot_reward,
+                "walk_reward": walk_reward,
                 "delta_h_mean": delta_h,
                 "nz_mean": nz,
                 "x_vel_mean": (x_after - x_before) / self.dt,
                 "height_mean": height,
                 "success": success}
+        wandb.log(info)
         return ob, reward, done, info
 
     def _get_obs(self):

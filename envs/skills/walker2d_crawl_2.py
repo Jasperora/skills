@@ -5,6 +5,7 @@ from gym.envs.mujoco import mujoco_env
 
 from gym.envs.skills.walker2d import Walker2dEnv
 
+import wandb
 
 class Walker2dCrawl2Env(Walker2dEnv):
     def __init__(self):
@@ -18,7 +19,8 @@ class Walker2dCrawl2Env(Walker2dEnv):
             "foot_reward": 0.01,
             "height_reward": 1,
             "x_vel_limit": 3,
-            "crawl_reward": 3,
+            "crawl_reward": 2,
+            "walk_reward": 1,
             "min_height": 0,
         })
 
@@ -27,7 +29,7 @@ class Walker2dCrawl2Env(Walker2dEnv):
 
         # env info
         self.reward_type += ["x_vel_reward", "alive_reward", "angle_reward",
-                             "foot_reward", "height_reward", "success",
+                             "foot_reward", "height_reward", "walk_reward", "success",
                              "x_vel_mean", "height_mean", "nz_mean", "delta_h_mean"]
         self.ob_type = self.ob_shape.keys()
 
@@ -70,8 +72,12 @@ class Walker2dCrawl2Env(Walker2dEnv):
         alive_reward = self._config["alive_reward"]
         foot_reward = -self._config["foot_reward"] * (right_foot_vel + left_foot_vel)
         crawl_reward = -self._config["crawl_reward"] * abs(self.data.body_xpos[1, 2] - 0.5)
+        if (right_foot_before < left_foot_before and right_foot_after > left_foot_after) or (left_foot_before < right_foot_before and left_foot_after > right_foot_after):
+            walk_reward = self._config["walk_reward"]
+        else:
+            walk_reward = 0
         reward = x_vel_reward + angle_reward + height_reward + \
-            ctrl_reward + alive_reward + foot_reward + crawl_reward
+            ctrl_reward + alive_reward + foot_reward + crawl_reward + walk_reward
 
         # fail
         done = height < self._config["min_height"]
@@ -87,11 +93,13 @@ class Walker2dCrawl2Env(Walker2dEnv):
                 "alive_reward": alive_reward,
                 "foot_reward": foot_reward,
                 "crawl_reward": crawl_reward,
+                "walk_reward": walk_reward,
                 "delta_h_mean": delta_h,
                 "nz_mean": nz,
                 "x_vel_mean": (x_after - x_before) / self.dt,
                 "height_mean": height,
                 "success": success}
+        wandb.log(info)
         return ob, reward, done, info
 
     def _get_obs(self):

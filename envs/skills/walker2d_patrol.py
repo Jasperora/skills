@@ -5,6 +5,7 @@ from gym.envs.mujoco import mujoco_env
 
 from gym.envs.skills.walker2d import Walker2dEnv
 
+import wandb
 
 # Forward and backward
 class Walker2dPatrolEnv(Walker2dEnv):
@@ -131,6 +132,7 @@ class Walker2dPatrolEnv(Walker2dEnv):
                 "height_mean": height,
                 "success": success,
                 "direction": self._direction}
+        wandb.log(info)
         return ob, reward, done, info
 
     def _get_obs(self):

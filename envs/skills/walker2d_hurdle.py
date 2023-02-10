@@ -5,6 +5,7 @@ from gym.envs.mujoco import mujoco_env
 
 from gym.envs.skills.walker2d import Walker2dEnv
 
+import wandb
 
 # Forward and jump
 class Walker2dHurdleEnv(Walker2dEnv):
@@ -180,6 +181,7 @@ class Walker2dHurdleEnv(Walker2dEnv):
                 "x_vel_mean": (x_after - x_before) / self.dt,
                 "height_mean": height,
                 "success": success}
+        wandb.log(info)
         return ob, reward, done, info
 
     def _get_obs(self):
