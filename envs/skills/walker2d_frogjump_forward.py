@@ -13,7 +13,7 @@ class Walker2dFrogJumpForwardEnv(Walker2dEnv):
 
         # config
         self._config.update({
-            "x_vel_reward": 1,
+            "x_vel_reward": 2,
             "alive_reward": 1,
             "angle_reward": 0.1,
             "foot_reward": 0.01,

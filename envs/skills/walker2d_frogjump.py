@@ -13,7 +13,7 @@ class Walker2dFrogJumpEnv(Walker2dEnv):
 
         # config
         self._config.update({
-            "x_vel_reward": 0,
+            "x_vel_reward": -1,
             "alive_reward": 1,
             "angle_reward": 0.1,
             "foot_reward": 0.01,
@@ -70,7 +70,7 @@ class Walker2dFrogJumpEnv(Walker2dEnv):
         delta_h = self.data.body_xpos[1, 2] - max(self.data.body_xpos[4, 2], self.data.body_xpos[7, 2])
         nz = np.cos(angle)
         x_vel = (x_after - x_before) / self.dt
-        x_vel = self._config["x_vel_limit"] - abs(x_vel - self._config["x_vel_limit"])
+        # x_vel = self._config["x_vel_limit"] - abs(x_vel - self._config["x_vel_limit"])
         right_foot_vel = abs(right_foot_after - right_foot_before) / self.dt
         left_foot_vel = abs(left_foot_after - left_foot_before) / self.dt
         foot_height_diff = abs(self.data.body_xpos[4, 2] - self.data.body_xpos[7, 2])
@@ -81,7 +81,7 @@ class Walker2dFrogJumpEnv(Walker2dEnv):
 
 
         # reward
-        x_vel_reward = self._config["x_vel_reward"] * x_vel
+        x_vel_reward = self._config["x_vel_reward"] * abs(x_vel)
         angle_reward = self._config["angle_reward"] * nz
         height_reward = self._config["height_reward"] * min(self.data.body_xpos[4, 2], self.data.body_xpos[7, 2])
         alive_reward = self._config["alive_reward"]
